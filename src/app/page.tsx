@@ -101,22 +101,15 @@ export default function Home() {
       {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4">
         <ThemeToggle />
-        <div className="flex items-center gap-2">
-          {user && profile ? (
-            <>
-              <span className="text-sm font-medium hidden sm:inline">{profile.nama}</span>
-              <button onClick={handleLogout} className="btn-ghost text-sm px-3 py-1.5 flex items-center gap-1">
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Keluar</span>
-              </button>
-            </>
-          ) : (
-            <Link href="/register" className="btn-primary text-sm px-4 py-2 flex items-center gap-1.5">
-              <LogIn className="w-4 h-4" />
-              Masuk
-            </Link>
-          )}
-        </div>
+        {user && profile && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium hidden sm:inline">{profile.nama}</span>
+            <button onClick={handleLogout} className="btn-ghost text-sm px-3 py-1.5 flex items-center gap-1">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Keluar</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Hero Section with Mosque Image */}
