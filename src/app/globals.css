@@ -37,10 +37,13 @@
 }
 
 @layer base {
+
   /* ================ LIGHT MODE (DEFAULT) ================ */
   :root {
-    --background: 45 30% 96%; /* Warm off-white */
-    --foreground: 30 10% 15%; /* Dark brown-gray */
+    --background: 45 30% 96%;
+    /* Warm off-white */
+    --foreground: 30 10% 15%;
+    /* Dark brown-gray */
 
     --card: 45 25% 92%;
     --card-foreground: 30 10% 15%;
@@ -48,16 +51,19 @@
     --popover: 45 25% 92%;
     --popover-foreground: 30 10% 15%;
 
-    --primary: 38 80% 50%; /* Islamic Gold */
+    --primary: 38 80% 50%;
+    /* Islamic Gold */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 180 15% 85%; /* Soft Teal-Gray */
+    --secondary: 180 15% 85%;
+    /* Soft Teal-Gray */
     --secondary-foreground: 30 10% 15%;
 
     --muted: 45 15% 88%;
     --muted-foreground: 30 10% 45%;
 
-    --accent: 160 40% 45%; /* Deep Teal (Accent) */
+    --accent: 174 62% 47%;
+    /* Tosca Green (Turquoise) */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 65% 50%;
@@ -70,8 +76,10 @@
 
   /* ================ DARK MODE ================ */
   .dark {
-    --background: 220 20% 8%; /* Deep charcoal */
-    --foreground: 45 20% 92%; /* Warm off-white text */
+    --background: 220 20% 8%;
+    /* Deep charcoal */
+    --foreground: 45 20% 92%;
+    /* Warm off-white text */
 
     --card: 220 18% 12%;
     --card-foreground: 45 20% 92%;
@@ -79,7 +87,8 @@
     --popover: 220 18% 12%;
     --popover-foreground: 45 20% 92%;
 
-    --primary: 40 85% 55%; /* Brighter Gold for dark bg */
+    --primary: 40 85% 55%;
+    /* Brighter Gold for dark bg */
     --primary-foreground: 220 20% 8%;
 
     --secondary: 220 15% 18%;
@@ -88,7 +97,8 @@
     --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 165 50% 40%; /* Teal for dark mode */
+    --accent: 174 55% 50%;
+    /* Brighter Tosca for dark mode */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 60% 45%;
@@ -99,7 +109,11 @@
     --ring: 40 85% 55%;
   }
 
-  *, ::after, ::before, ::backdrop, ::file-selector-button {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
     border-color: var(--color-border, currentColor);
   }
 }
@@ -133,20 +147,20 @@ body {
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .card-elegant:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .dark .card-elegant {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .dark .card-elegant:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* Button styles */
