@@ -37,47 +37,57 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
+      // Parallel queries for faster loading
       const { data: { user: authUser } } = await supabase.auth.getUser();
       setUser(authUser);
+      setLoading(false); // Show UI immediately after auth check
+
+      // Fetch profile and content in parallel (non-blocking)
+      const promises = [];
 
       if (authUser) {
-        const { data: profileData } = await supabase
-          .from('users')
-          .select('nama, role')
-          .eq('user_id', authUser.id)
-          .single();
-        setProfile(profileData);
+        promises.push(
+          supabase
+            .from('users')
+            .select('nama, role')
+            .eq('user_id', authUser.id)
+            .single()
+            .then(({ data }) => setProfile(data))
+        );
       }
 
-      // Fetch kajian - get 4 to check if there are more
+      // Fetch kajian and berita in parallel (optional, won't block UI)
       const today = new Date().toISOString().split('T')[0];
-      const { data: kajianData } = await supabase
-        .from('kajian_subuh')
-        .select('*')
-        .gte('tanggal', today)
-        .eq('is_active', true)
-        .order('tanggal', { ascending: true })
-        .limit(4);
+      promises.push(
+        supabase
+          .from('kajian_subuh')
+          .select('*')
+          .gte('tanggal', today)
+          .eq('is_active', true)
+          .order('tanggal', { ascending: true })
+          .limit(4)
+          .then(({ data }) => {
+            if (data) {
+              setHasMoreKajian(data.length > 3);
+              setKajianList(data.slice(0, 3));
+            }
+          })
+      );
 
-      if (kajianData) {
-        setHasMoreKajian(kajianData.length > 3);
-        setKajianList(kajianData.slice(0, 3));
-      }
+      promises.push(
+        supabase
+          .from('warta_berita')
+          .select('news_id, title, content, created_at')
+          .order('created_at', { ascending: false })
+          .limit(2)
+          .then(({ data }) => setBeritaList(data || []))
+      );
 
-      // Fetch berita - only 2
-      const { data: beritaData } = await supabase
-        .from('warta_berita')
-        .select('news_id, title, content, created_at')
-        .order('created_at', { ascending: false })
-        .limit(2);
-
-      if (beritaData) {
-        setBeritaList(beritaData);
-      }
+      // Wait for all optional data (doesn't block initial render)
+      await Promise.all(promises);
 
     } catch (error) {
       console.error(error);
-    } finally {
       setLoading(false);
     }
   };
