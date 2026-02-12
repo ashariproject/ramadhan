@@ -83,7 +83,7 @@ export default function LoginPage() {
                 {/* Content */}
                 <div className="relative h-full flex flex-col items-center justify-center text-white px-4 text-center">
                     <div className="mb-4">
-                        <Moon className="w-16 h-16 mx-auto mb-2 opacity-90" />
+                        <img src="/logo-ramadhan.png" alt="Masjid As Sakinah" className="w-32 h-32 mx-auto mb-3 drop-shadow-2xl" />
                     </div>
                     <h1 className="text-3xl md:text-4xl font-bold mb-2">
                         Masjid As Sakinah
