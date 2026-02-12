@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from "next/link";
-import { ArrowRight, BookOpen, QrCode, ClipboardList, LogOut, Loader2, User, Calendar, Clock, Newspaper, ChevronRight } from "lucide-react";
+import { ArrowRight, BookOpen, QrCode, ClipboardList, LogOut, Loader2, User, Calendar, Clock, Newspaper, ChevronRight, Star } from "lucide-react";
 import { supabase } from '@/lib/supabase';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -124,20 +124,39 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Quick Actions - Compact */}
+            {/* Quick Actions - Role-based */}
             <div className="grid grid-cols-3 gap-2 mb-4">
-              <Link href="/card" className="card-elegant flex flex-col items-center py-4 hover:border-primary/50 transition">
-                <QrCode className="w-5 h-5 text-primary mb-1" />
-                <span className="text-[10px] font-medium">Kartu</span>
-              </Link>
-              <Link href="/journal" className="card-elegant flex flex-col items-center py-4 hover:border-accent/50 transition">
-                <BookOpen className="w-5 h-5 text-accent mb-1" />
-                <span className="text-[10px] font-medium">Jurnal</span>
-              </Link>
-              <Link href="/riwayat" className="card-elegant flex flex-col items-center py-4 hover:border-blue-500/50 transition">
-                <ClipboardList className="w-5 h-5 text-blue-500 mb-1" />
-                <span className="text-[10px] font-medium">Riwayat</span>
-              </Link>
+              {profile.role === 'jamaah_dewasa' ? (
+                <>
+                  <Link href="/dashboard" className="card-elegant flex flex-col items-center py-4 hover:border-amber-500/50 transition">
+                    <Star className="w-5 h-5 text-amber-500 mb-1" />
+                    <span className="text-[10px] font-medium">Dashboard</span>
+                  </Link>
+                  <Link href="/card" className="card-elegant flex flex-col items-center py-4 hover:border-primary/50 transition">
+                    <QrCode className="w-5 h-5 text-primary mb-1" />
+                    <span className="text-[10px] font-medium">Kartu</span>
+                  </Link>
+                  <Link href="/riwayat" className="card-elegant flex flex-col items-center py-4 hover:border-blue-500/50 transition">
+                    <ClipboardList className="w-5 h-5 text-blue-500 mb-1" />
+                    <span className="text-[10px] font-medium">Riwayat</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/card" className="card-elegant flex flex-col items-center py-4 hover:border-primary/50 transition">
+                    <QrCode className="w-5 h-5 text-primary mb-1" />
+                    <span className="text-[10px] font-medium">Kartu</span>
+                  </Link>
+                  <Link href="/journal" className="card-elegant flex flex-col items-center py-4 hover:border-accent/50 transition">
+                    <BookOpen className="w-5 h-5 text-accent mb-1" />
+                    <span className="text-[10px] font-medium">Jurnal</span>
+                  </Link>
+                  <Link href="/riwayat" className="card-elegant flex flex-col items-center py-4 hover:border-blue-500/50 transition">
+                    <ClipboardList className="w-5 h-5 text-blue-500 mb-1" />
+                    <span className="text-[10px] font-medium">Riwayat</span>
+                  </Link>
+                </>
+              )}
             </div>
 
             {['admin_utama', 'panitia', 'admin_media'].includes(profile.role) && (
