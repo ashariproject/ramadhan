@@ -1,17 +1,30 @@
 -- =============================================
 -- SEED SCRIPT: 8 Default Panitia Accounts
 -- Jalankan di Supabase SQL Editor
+-- Aman dijalankan berulang (skip jika sudah ada)
 -- =============================================
 
--- Enable pgcrypto for password hashing
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Function to create panitia user
+-- Function yang skip jika email sudah ada
 CREATE OR REPLACE FUNCTION create_panitia(p_email TEXT, p_nama TEXT) RETURNS void AS $$
 DECLARE
   new_user_id UUID;
+  existing_id UUID;
 BEGIN
-  -- Insert into auth.users
+  -- Cek apakah sudah ada di auth.users
+  SELECT id INTO existing_id FROM auth.users WHERE email = p_email;
+  
+  IF existing_id IS NOT NULL THEN
+    -- Sudah ada, pastikan ada di public.users juga
+    INSERT INTO public.users (user_id, nama, no_wa, gender, role)
+    VALUES (existing_id, p_nama, REPLACE(p_email, '@assakinah.com', ''), 'L', 'panitia')
+    ON CONFLICT (user_id) DO UPDATE SET role = 'panitia', nama = p_nama;
+    RAISE NOTICE 'User % sudah ada, di-skip', p_email;
+    RETURN;
+  END IF;
+
+  -- Buat baru
   INSERT INTO auth.users (
     instance_id, id, aud, role, email,
     encrypted_password, email_confirmed_at,
@@ -30,7 +43,6 @@ BEGIN
   )
   RETURNING id INTO new_user_id;
 
-  -- Insert into public.users
   INSERT INTO public.users (user_id, nama, no_wa, gender, role)
   VALUES (new_user_id, p_nama, REPLACE(p_email, '@assakinah.com', ''), 'L', 'panitia');
 END;
@@ -46,16 +58,16 @@ SELECT create_panitia('panitia6@assakinah.com', 'Panitia 6');
 SELECT create_panitia('panitia7@assakinah.com', 'Panitia 7');
 SELECT create_panitia('panitia8@assakinah.com', 'Panitia 8');
 
--- Cleanup helper function
+-- Cleanup
 DROP FUNCTION create_panitia(TEXT, TEXT);
 
 -- =============================================
--- NEW TABLE: Penilaian Anak
+-- NEW TABLE: Penilaian Anak (skip jika sudah ada)
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.penilaian_anak (
     penilaian_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES public.users(user_id) NOT NULL, -- anak yang dinilai
-    penilai_id UUID REFERENCES public.users(user_id),       -- panitia yang menilai
+    user_id UUID REFERENCES public.users(user_id) NOT NULL,
+    penilai_id UUID REFERENCES public.users(user_id),
     tanggal DATE NOT NULL DEFAULT CURRENT_DATE,
     kategori TEXT NOT NULL CHECK (kategori IN ('hafalan', 'adab', 'keaktifan', 'kebersihan')),
     nilai INTEGER CHECK (nilai >= 1 AND nilai <= 5),
@@ -63,10 +75,10 @@ CREATE TABLE IF NOT EXISTS public.penilaian_anak (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- RLS for Penilaian
 ALTER TABLE public.penilaian_anak ENABLE ROW LEVEL SECURITY;
 
--- Panitia can insert/update penilaian
+-- Drop policies dulu kalau sudah ada, baru buat ulang
+DROP POLICY IF EXISTS "Panitia can manage penilaian" ON public.penilaian_anak;
 CREATE POLICY "Panitia can manage penilaian"
 ON public.penilaian_anak FOR ALL
 USING (
@@ -77,14 +89,13 @@ USING (
     )
 );
 
--- Anak can view their own penilaian
+DROP POLICY IF EXISTS "Anak can view own penilaian" ON public.penilaian_anak;
 CREATE POLICY "Anak can view own penilaian"
 ON public.penilaian_anak FOR SELECT
 USING (auth.uid() = user_id);
 
--- =============================================
--- UPDATE RLS: Allow panitia to view all attendance logs
--- =============================================
+-- RLS tambahan (skip jika sudah ada)
+DROP POLICY IF EXISTS "Panitia can view all logs" ON public.attendance_logs;
 CREATE POLICY "Panitia can view all logs"
 ON public.attendance_logs FOR SELECT
 USING (
@@ -95,7 +106,7 @@ USING (
     )
 );
 
--- Allow panitia to insert users (for tambah jamaah)
+DROP POLICY IF EXISTS "Panitia can insert users" ON public.users;
 CREATE POLICY "Panitia can insert users"
 ON public.users FOR INSERT
 WITH CHECK (

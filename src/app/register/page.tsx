@@ -3,24 +3,20 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LogIn, Phone } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
-export default function AuthPage() {
+export default function LoginPage() {
     const router = useRouter();
-    const [isLogin, setIsLogin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     const [formData, setFormData] = useState({
-        nama: '',
         no_wa: '',
-        gender: 'L',
-        role: 'jamaah_dewasa',
         password: '',
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
@@ -31,32 +27,23 @@ export default function AuthPage() {
 
         try {
             const email = `${formData.no_wa}@assakinah.com`;
-            const password = formData.password || 'ramadhan123';
+            const password = formData.password;
 
-            let user = null;
-
-            if (isLogin) {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                user = data.user;
-            } else {
-                const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
-                if (authError) throw authError;
-                if (!authData.user) throw new Error('Failed to create user');
-                user = authData.user;
-
-                const { error: profileError } = await supabase
-                    .from('users')
-                    .insert({
-                        user_id: user.id,
-                        nama: formData.nama,
-                        no_wa: formData.no_wa,
-                        gender: formData.gender,
-                        role: formData.role,
-                    });
-
-                if (profileError) throw profileError;
+            if (!password) {
+                setError('Masukkan password');
+                setLoading(false);
+                return;
             }
+
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                if (error.message === 'Invalid login credentials') {
+                    throw new Error('No WA atau password salah. Cek kembali.');
+                }
+                throw error;
+            }
+
+            const user = data.user;
 
             const { data: profile } = await supabase
                 .from('users')
@@ -64,18 +51,18 @@ export default function AuthPage() {
                 .eq('user_id', user.id)
                 .single();
 
-            const role = profile?.role || formData.role;
+            const role = profile?.role || 'jamaah_dewasa';
 
             if (role === 'jamaah_anak') {
                 router.push('/journal');
             } else if (['admin_utama', 'panitia', 'admin_media'].includes(role)) {
                 router.push('/admin');
             } else {
-                router.push('/dashboard'); // Dewasa → Dashboard Subuh
+                router.push('/dashboard');
             }
 
         } catch (err: any) {
-            console.error('AUTH ERROR:', err);
+            console.error('LOGIN ERROR:', err);
             setError(err.message || 'Terjadi kesalahan.');
         } finally {
             setLoading(false);
@@ -89,12 +76,14 @@ export default function AuthPage() {
             </div>
 
             <div className="card-elegant w-full max-w-sm">
+                {/* Header */}
                 <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold mb-1">
-                        {isLogin ? 'Masuk' : 'Daftar Baru'}
-                    </h1>
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <LogIn className="w-8 h-8 text-primary" />
+                    </div>
+                    <h1 className="text-2xl font-bold mb-1">Masuk</h1>
                     <p className="text-sm text-muted-foreground">
-                        {isLogin ? 'Selamat datang kembali' : 'Bergabung dengan kami'}
+                        Ramadhan 1447H — As Sakinah
                     </p>
                 </div>
 
@@ -105,88 +94,51 @@ export default function AuthPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {!isLogin && (
-                        <div>
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nama Lengkap</label>
-                            <input
-                                name="nama"
-                                required={!isLogin}
-                                placeholder="Masukkan nama"
-                                className="w-full mt-1 bg-secondary border border-border rounded-lg px-4 py-3 focus:border-primary outline-none transition"
-                                onChange={handleChange}
-                            />
-                        </div>
-                    )}
-
                     <div>
-                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">WhatsApp</label>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">No WhatsApp</label>
                         <input
                             name="no_wa"
                             required
-                            placeholder="08..."
+                            placeholder="Masukkan No WA"
                             className="w-full mt-1 bg-secondary border border-border rounded-lg px-4 py-3 focus:border-primary outline-none transition"
                             onChange={handleChange}
                         />
                     </div>
-
-                    {!isLogin && (
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Gender</label>
-                                <select
-                                    name="gender"
-                                    className="w-full mt-1 bg-secondary border border-border rounded-lg px-4 py-3 outline-none"
-                                    onChange={handleChange}
-                                >
-                                    <option value="L">Laki-laki</option>
-                                    <option value="P">Perempuan</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Peran</label>
-                                <select
-                                    name="role"
-                                    className="w-full mt-1 bg-secondary border border-border rounded-lg px-4 py-3 outline-none"
-                                    onChange={handleChange}
-                                >
-                                    <option value="jamaah_dewasa">Dewasa</option>
-                                    <option value="jamaah_anak">Anak-Anak</option>
-                                    <option value="panitia">Panitia (Untuk Testing)</option>
-                                </select>
-                            </div>
-                        </div>
-                    )}
 
                     <div>
                         <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Password</label>
                         <input
                             name="password"
                             type="password"
-                            placeholder="******"
+                            required
+                            placeholder="Masukkan password"
                             className="w-full mt-1 bg-secondary border border-border rounded-lg px-4 py-3 focus:border-primary outline-none transition"
                             onChange={handleChange}
                         />
-                        <p className="text-[10px] text-muted-foreground mt-1">Default: ramadhan123</p>
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="btn-primary w-full flex items-center justify-center"
+                        className="btn-primary w-full flex items-center justify-center gap-2"
                     >
-                        {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isLogin ? 'Masuk' : 'Daftar')}
+                        {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (
+                            <>
+                                <LogIn className="w-4 h-4" />
+                                Masuk
+                            </>
+                        )}
                     </button>
-
-                    <div className="text-center">
-                        <button
-                            type="button"
-                            onClick={() => setIsLogin(!isLogin)}
-                            className="text-primary hover:underline text-sm"
-                        >
-                            {isLogin ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Masuk'}
-                        </button>
-                    </div>
                 </form>
+
+                {/* Info daftar */}
+                <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-center">
+                    <Phone className="w-5 h-5 text-blue-500 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-blue-500">Belum punya akun?</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        Hubungi <strong>Panitia</strong> untuk pendaftaran
+                    </p>
+                </div>
             </div>
         </div>
     );
