@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Loader2, UserPlus, Scan, ClipboardEdit, QrCode, BarChart3, ArrowLeft, LogOut } from 'lucide-react';
+import { Loader2, UserPlus, Scan, ClipboardEdit, QrCode, BarChart3, ArrowLeft, LogOut, BookOpen, Newspaper, Users } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
@@ -105,6 +105,30 @@ export default function AdminDashboard() {
             desc: 'Lihat data presensi',
             color: 'from-rose-500 to-pink-600',
             iconColor: 'text-rose-100'
+        },
+        {
+            href: '/admin/kajian',
+            icon: <BookOpen className="w-8 h-8" />,
+            label: 'Kelola Kajian',
+            desc: 'Edit jadwal kajian',
+            color: 'from-teal-500 to-cyan-600',
+            iconColor: 'text-teal-100'
+        },
+        {
+            href: '/admin/warta/create',
+            icon: <Newspaper className="w-8 h-8" />,
+            label: 'Kelola Warta',
+            desc: 'Posting berita',
+            color: 'from-orange-500 to-red-600',
+            iconColor: 'text-orange-100'
+        },
+        {
+            href: '/admin/users',
+            icon: <Users className="w-8 h-8" />,
+            label: 'Kelola User',
+            desc: 'Lihat semua jamaah',
+            color: 'from-slate-500 to-gray-600',
+            iconColor: 'text-slate-100'
         },
     ];
 
